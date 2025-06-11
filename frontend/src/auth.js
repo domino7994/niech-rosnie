@@ -1,35 +1,52 @@
 // src/auth.js
-import { reactive } from 'vue'
+import { reactive } from 'vue';
 
 export const authState = reactive({
-  loggedIn: !!localStorage.getItem('token'),
-  isAdmin: false
-})
+  isLoggedIn: false,
+  isAdmin: false,
+  userId: null,
+  token: null,
+});
 
-export function getToken() {
-  return localStorage.getItem('token')
+export function loadTokenFromStorage() {
+  const token = localStorage.getItem('token');
+  if (token) {
+    setToken(token);
+  }
 }
 
-export function isLoggedIn() {
-  return authState.loggedIn
-}
+export function setToken(token) {
+  authState.token = token;
+  localStorage.setItem('token', token);
 
-export function logout() {
-  localStorage.removeItem('token')
-  authState.loggedIn = false
-  authState.isAdmin = false
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    authState.isLoggedIn = true;
+    authState.isAdmin = !!payload.isAdmin;
+    authState.userId = payload.id;
+  } catch (err) {
+    console.error('❌ Błąd dekodowania tokenu:', err);
+    logout();
+  }
 }
 
 export function updateAuthFromToken() {
-  const token = getToken()
+  const token = localStorage.getItem('token');
   if (token) {
-    try {
-      const decoded = JSON.parse(atob(token.split('.')[1]))
-      authState.loggedIn = true
-      authState.isAdmin = decoded.isAdmin === true
-    } catch (e) {
-      console.error('❌ Błąd dekodowania tokenu:', e)
-      logout()
-    }
+    setToken(token);
+  } else {
+    logout();
   }
+}
+
+export function getToken() {
+  return authState.token;
+}
+
+export function logout() {
+  authState.isLoggedIn = false;
+  authState.isAdmin = false;
+  authState.userId = null;
+  authState.token = null;
+  localStorage.removeItem('token');
 }
