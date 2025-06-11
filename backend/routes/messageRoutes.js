@@ -83,3 +83,29 @@ router.get('/admin/unread-per-order', authMiddleware, isAdminMiddleware, async (
 })
 
 module.exports = router
+
+// ✅ Liczba nieprzeczytanych wiadomości dla użytkownika (wszystkich zamówień)
+router.get('/user/unread-count', authMiddleware, async (req, res) => {
+  try {
+    const count = await Message.countDocuments({
+      sender: { $ne: req.user.id },       // wiadomość nie od użytkownika
+      readByUser: false,                  // i nieprzeczytana
+      user: req.user.id                   // (opcjonalnie, jeśli masz userId w wiadomości)
+    });
+    res.json({ count });
+  } catch (err) {
+    res.status(500).json({ message: 'Błąd zliczania wiadomości użytkownika' });
+  }
+});
+// ✅ Oznacz wszystkie wiadomości z danego zamówienia jako przeczytane przez admina
+router.put('/admin/mark-read/:orderId', authMiddleware, isAdminMiddleware, async (req, res) => {
+  try {
+    await Message.updateMany(
+      { order: req.params.orderId, readByAdmin: false },
+      { $set: { readByAdmin: true } }
+    );
+    res.json({ message: 'Wiadomości oznaczone jako przeczytane' });
+  } catch (err) {
+    res.status(500).json({ message: 'Błąd oznaczania wiadomości jako przeczytane' });
+  }
+});

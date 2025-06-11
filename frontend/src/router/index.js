@@ -43,14 +43,24 @@ const router = createRouter({
 })
 
 // 🔐 Ochrona tras wymagających logowania
-import { getToken } from '../auth'
+
+
+
+import { getToken, updateAuthFromToken, authState } from '../auth';
 
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !getToken()) {
-    next('/login')
+  updateAuthFromToken();
+
+  const isLoggedIn = authState.isLoggedIn;
+  const isAdmin = authState.isAdmin;
+
+  if (to.meta.requiresAuth && !isLoggedIn) {
+    next('/login');
+  } else if (to.path === '/profile' && isAdmin) {
+    next('/admin'); // ⛔ zablokuj adminowi wejście na /profile
   } else {
-    next()
+    next();
   }
-})
+});
 
 export default router

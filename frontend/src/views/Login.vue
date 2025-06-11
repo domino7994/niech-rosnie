@@ -63,7 +63,7 @@ export default {
         if (decoded.isAdmin) {
           this.$router.push('/admin');
         } else {
-          this.$router.push('/profile');
+          this.$router.push('/');
         }
       } catch (err) {
         this.error = err.response?.data?.message || 'Błąd logowania';
