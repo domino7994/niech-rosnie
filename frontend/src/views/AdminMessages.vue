@@ -1,41 +1,30 @@
 <template>
-  <div class="max-w-4xl mx-auto p-6 bg-white rounded shadow">
-    <h2 class="text-2xl font-bold mb-6 text-green-700">📨 Wiadomości od użytkowników</h2>
-
-    <div v-if="loading" class="text-gray-500">Ładowanie wiadomości...</div>
-
-    <div v-else-if="orders.length === 0" class="text-gray-500">Brak wiadomości.</div>
-
-    <div v-else>
-    <div
+  <div
   v-for="order in orders"
   :key="order._id"
   :class="['border-b py-4 flex justify-between items-center', { 'bg-purple-50': unreadMap[order._id] > 0 }]"
 >
+  <p class="font-semibold text-green-800">Zamówienie: {{ order?._id }}</p>
+  <p class="text-sm text-gray-600">Użytkownik: {{ order.user.username }}</p>
+  <p class="text-sm text-gray-600">Data: {{ formatDate(order.createdAt) }}</p>
 
-          <p class="font-semibold text-green-800">Zamówienie: {{ order._id }}</p>
-          <p class="text-sm text-gray-600">Użytkownik: {{ order.user.username }}</p>
-          <p class="text-sm text-gray-600">Data: {{ formatDate(order.createdAt) }}</p>
-        </div>
+  <button
+    @click="openChat(order._id)"
+    :class="[
+      'px-4 py-2 rounded flex items-center gap-2',
+      unreadMap[order._id] > 0 ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-800'
+    ]"
+  >
+    💬 Otwórz czat
+    <span
+      v-if="unreadMap[order._id]"
+      class="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full"
+    >
+      {{ unreadMap[order._id] }}
+    </span>
+  </button>
+</div>
 
-        <button
-  @click="openChat(order._id)"
-  :class="[
-    'px-4 py-2 rounded flex items-center gap-2',
-    unreadMap[order._id] > 0 ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-800'
-  ]"
->
-
-          💬 Otwórz czat
-          <span
-            v-if="unreadMap[order._id]"
-            class="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full"
-          >
-            {{ unreadMap[order._id] }}
-          </span>
-        </button>
-      </div>
-    </div>
   
 </template>
 

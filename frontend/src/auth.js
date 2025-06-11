@@ -1,4 +1,3 @@
-// src/auth.js
 import { reactive } from 'vue';
 
 export const authState = reactive({
@@ -40,7 +39,7 @@ export function updateAuthFromToken() {
 }
 
 export function getToken() {
-  return authState.token;
+  return localStorage.getItem('token'); // ← bezpośrednio z localStorage, zawsze aktualne
 }
 
 export function logout() {
