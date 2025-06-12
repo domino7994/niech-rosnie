@@ -12,6 +12,28 @@ router.get('/:productId', async (req, res) => {
     res.status(500).json({ message: '❌ Błąd pobierania opinii' })
   }
 })
+// ✅ Pobierz najnowsze opinie (do strony głównej)
+router.get('/', async (req, res) => {
+  try {
+    const reviews = await Review.find()
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .populate('user', 'username')
+
+    const formatted = reviews.map(r => ({
+      _id: r._id,
+      username: r.user?.username || r.username,
+      rating: r.rating,
+      comment: r.comment
+    }))
+
+    res.json(formatted)
+  } catch (err) {
+    console.error('❌ Błąd pobierania opinii:', err)
+    res.status(500).json({ message: '❌ Błąd pobierania opinii' })
+  }
+})
+
 
 // ✅ Dodaj opinię do produktu
 router.post('/:productId', authMiddleware, async (req, res) => {
