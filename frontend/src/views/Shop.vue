@@ -7,34 +7,38 @@
 
     <div class="product-grid">
       <div v-for="product in products" :key="product._id" class="product-card">
-        <img
-          :src="product.imageUrl"
-          :alt="product.name"
-          class="product-image"
-          @error="onImageError"
-        />
-        <h3 class="product-name">{{ product.name }}</h3>
-        <p class="product-description">{{ product.description }}</p>
-        <p class="product-price">{{ product.price.toFixed(2) }} zł</p>
+  <router-link :to="`/product/${product._id}`" class="block hover:opacity-90">
+    <img
+      :src="product.imageUrl"
+      :alt="product.name"
+      class="product-image"
+      @error="onImageError"
+    />
+    <h3 class="product-name">{{ product.name }}</h3>
+    <p class="product-description">{{ product.description }}</p>
+    <p class="product-price">{{ product.price.toFixed(2) }} zł</p>
+  </router-link>
 
-        <!-- 🔁 Warunkowy przycisk: inny dla admina -->
-        <div class="text-center mt-2">
-          <router-link
-            v-if="isAdmin"
-            to="/admin/edit-products"
-            class="btn-secondary"
-          >
-            ✏️ Edytuj produkt
-          </router-link>
+  <!-- 🔁 Przycisk admin/użytkownik -->
+  <div class="text-center mt-2">
+    <router-link
+      v-if="isAdmin"
+      to="/admin/edit-products"
+      class="btn-secondary"
+    >
+      ✏️ Edytuj produkt
+    </router-link>
 
-          <button
-            v-else
-            @click="addToCart(product)"
-            class="btn-primary"
-          >
-            ➕ Dodaj do koszyka
-          </button>
-        </div>
+    <button
+      v-else
+      @click="addToCart(product)"
+      class="btn-primary"
+    >
+      ➕ Dodaj do koszyka
+    </button>
+  </div>
+
+
       </div>
     </div>
   </div>
@@ -69,11 +73,19 @@ export default {
   },
   methods: {
     addToCart(product) {
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      cart.push({ productId: product._id, quantity: 1 });
-      localStorage.setItem('cart', JSON.stringify(cart));
-      alert('✅ Produkt dodany do koszyka!');
-    },
+  const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+  
+  cart.push({
+    _id: product._id,
+    name: product.name,
+    price: product.price,
+    quantity: 1
+  });
+
+  localStorage.setItem('cart', JSON.stringify(cart));
+  alert('✅ Produkt dodany do koszyka!');
+}
+,
     onImageError(event) {
       event.target.src = 'https://via.placeholder.com/150?text=Brak+zdjęcia';
     }

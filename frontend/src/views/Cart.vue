@@ -16,7 +16,8 @@
         </button>
       </div>
 
-      <p class="text-lg font-bold mt-4">Suma: {{ totalPrice }} zł</p>
+     <p class="text-lg font-bold mt-4">Suma: {{ totalPrice.toFixed(2) }} zł</p>
+
 
       <div class="flex gap-4 mt-4">
         <button
@@ -49,8 +50,9 @@ export default {
   },
   computed: {
     totalPrice() {
-      return this.cart.reduce((sum, item) => sum + item.price, 0).toFixed(2)
-    }
+  return this.cart.reduce((sum, item) => sum + item.price, 0)
+}
+
   },
   mounted() {
     const savedCart = localStorage.getItem('cart')
@@ -81,6 +83,7 @@ export default {
             country: 'Polska'
           }
         }
+console.log('📦 Zamówienie:', order)
 
         await axios.post('http://localhost:5000/api/orders', order, {
           headers: {

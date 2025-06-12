@@ -15,6 +15,9 @@ const messageRoutes = require('./routes/messageRoutes');
 
 // Middleware do obsługi błędów
 const errorHandler = require('./middleware/errorHandler');
+// Komentarze
+const reviewRoutes = require('./routes/reviewRoutes');
+
 
 // Załaduj konfigurację z pliku .env
 dotenv.config();
@@ -42,6 +45,9 @@ app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/messages', messageRoutes);
+
+app.use('/api/reviews', reviewRoutes);
+
 
 // Folder na pliki
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
