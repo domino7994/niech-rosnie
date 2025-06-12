@@ -40,6 +40,16 @@
           </span>
         </router-link>
 
+        <!-- 📦 Zamówienia admina -->
+<router-link
+  v-if="isLoggedIn && isAdmin"
+  to="/admin/orders"
+  class="nav-link"
+>
+  📦 Zamówienia
+</router-link>
+
+
         <router-link v-if="!isLoggedIn" to="/login" class="nav-link">🔐 Logowanie</router-link>
         <router-link v-if="!isLoggedIn" to="/register" class="nav-link">📝 Rejestracja</router-link>
         <button v-if="isLoggedIn" @click="logout" class="logout-button">🚪 Wyloguj</button>

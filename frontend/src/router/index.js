@@ -9,6 +9,8 @@ import Profile from '../views/Profile.vue'
 import Cart from '../views/Cart.vue'
 import PaymentSuccess from '../views/PaymentSuccess.vue'
 import ProductDetails from '../views/ProductDetails.vue'
+import AdminOrders from '../views/AdminOrders.vue'
+
 import AdminMessages from '../views/AdminMessages.vue'
 
 // 🔽 Widoki admina
@@ -34,6 +36,8 @@ const routes = [
   component: () => import('../views/UserMessages.vue'),
   meta: { requiresAuth: true }
 },
+{ path: '/admin/orders', component: AdminOrders, meta: { requiresAuth: true } },
+
 
 
   // 🔐 Admin
