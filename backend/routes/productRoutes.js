@@ -44,37 +44,39 @@ router.post(
   '/',
   authMiddleware,
   isAdminMiddleware,
-  upload.fields([
-    { name: 'image', maxCount: 1 },
-    { name: 'pdf', maxCount: 1 }
-  ]),
+  upload.single('image'),
   async (req, res) => {
     try {
-      const { name, price, description, category } = req.body
+      console.log('✅ POST /api/products');
+      console.log('BODY:', req.body);
+      console.log('FILE:', req.file);
 
+      const { name, price, description, category } = req.body;
+      const image = req.file;
 
-      const image = req.files['image']?.[0]
-      const pdf = req.files['pdf']?.[0]
-
-      if (!image) return res.status(400).json({ message: 'Brak obrazka produktu' })
+      if (!image) {
+        console.warn('❌ Brak pliku obrazka!');
+        return res.status(400).json({ message: 'Brak obrazka produktu' });
+      }
 
       const product = new Product({
         name,
         price,
         description,
         category,
-        image: `/uploads/${image.filename}`,
-        pdf: pdf ? `/uploads/${pdf.filename}` : null
-      })
+        imageUrl: `http://localhost:5000/uploads/${image.filename}`,
+      });
 
-      await product.save()
-      res.status(201).json(product)
+      await product.save();
+      console.log('✅ Produkt zapisany:', product.name);
+      res.status(201).json(product);
     } catch (err) {
-      console.error('❌ Błąd zapisu produktu:', err)
-      res.status(400).json({ message: err.message })
+      console.error('❌ Błąd zapisu produktu:', err);
+      res.status(400).json({ message: err.message });
     }
   }
-)
+);
+
 
 // ✅ Edycja produktu (dla admina)
 router.put(

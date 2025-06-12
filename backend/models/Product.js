@@ -1,12 +1,12 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const productSchema = mongoose.Schema({
   name: { type: String, required: true },
   description: String,
   price: { type: Number, required: true },
-  category: { type: String, required: true }, // ⬅️ kategoria
-  image: { type: String, required: true },
-  pdf: { type: String } // ⬅️ instrukcja pielęgnacji (opcjonalna)
-})
+  category: { type: String, required: true },
+  imageUrl: { type: String, required: true }, // ← NAZWA MUSI PASOWAĆ DO BACKENDU
+  pdf: { type: String }
+});
 
-module.exports = mongoose.model('Product', productSchema)
+module.exports = mongoose.model('Product', productSchema);
