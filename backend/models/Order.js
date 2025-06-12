@@ -16,6 +16,11 @@ const orderSchema = mongoose.Schema({
     postalCode: { type: String, required: true },
     country: { type: String, required: true }
   },
+status: {
+  type: String,
+  enum: ['Nowe', 'W realizacji', 'Wysłano', 'Dostarczono'],
+  default: 'Nowe'
+},
 
   // 🔧 TEN PRZECINEK BYŁ POTRZEBNY ↑
   isPaid: { type: Boolean, default: false },

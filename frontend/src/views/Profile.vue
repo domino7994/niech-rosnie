@@ -25,6 +25,12 @@
             {{ order.isPaid ? 'Opłacone' : 'Nieopłacone' }}
           </span>
         </p>
+<p>Status: <span :class="{
+  'text-gray-700': order.status === 'Nowe',
+  'text-blue-700': order.status === 'W realizacji',
+  'text-yellow-600': order.status === 'Wysłano',
+  'text-green-700': order.status === 'Dostarczono'
+}">{{ order.status }}</span></p>
 
         <!-- 🟦 Przycisk PayPal dla nieopłaconych -->
         <div v-if="!order.isPaid" class="mt-2">

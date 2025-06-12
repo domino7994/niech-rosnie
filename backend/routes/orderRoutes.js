@@ -158,4 +158,21 @@ router.post('/:id/messages', authMiddleware, async (req, res) => {
   }
 });
 
+// ✅ Admin: zmiana statusu zamówienia
+router.put('/:id/status', authMiddleware, isAdminMiddleware, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Zamówienie nie znalezione' });
+
+    order.status = status;
+    await order.save();
+
+    res.json({ message: 'Status zaktualizowany', order });
+  } catch (err) {
+    res.status(500).json({ message: 'Błąd aktualizacji statusu' });
+  }
+});
+
+
 module.exports = router;
