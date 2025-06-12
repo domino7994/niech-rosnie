@@ -18,14 +18,43 @@ const authMiddleware = require('../middleware/authMiddleware')
 const isAdminMiddleware = require('../middleware/isAdminMiddleware')
 
 // ✅ Pobieranie wszystkich produktów
+const Review = require('../models/Review')
+const Order = require('../models/Order')
+
 router.get('/', async (req, res) => {
   try {
     const products = await Product.find()
-    res.json(products)
+
+    // Pobieramy opinie i zamówienia
+    const reviews = await Review.find()
+    const orders = await Order.find()
+
+    // Liczymy dane dodatkowe dla każdego produktu
+    const enrichedProducts = products.map(product => {
+      const productReviews = reviews.filter(r => r.product.toString() === product._id.toString())
+      const productOrders = orders.flatMap(order =>
+        order.products.filter(p => p.product.toString() === product._id.toString())
+      )
+
+      const totalSold = productOrders.reduce((sum, p) => sum + (p.quantity || 1), 0)
+      const averageRating = productReviews.length
+        ? (productReviews.reduce((sum, r) => sum + r.rating, 0) / productReviews.length).toFixed(1)
+        : null
+
+      return {
+        ...product.toObject(),
+        averageRating: averageRating ? Number(averageRating) : null,
+        reviewCount: productReviews.length,
+        soldCount: totalSold
+      }
+    })
+
+    res.json(enrichedProducts)
   } catch (err) {
     res.status(500).json({ message: err.message })
   }
 })
+
 
 // ✅ Pobieranie szczegółów jednego produktu
 router.get('/:id', async (req, res) => {

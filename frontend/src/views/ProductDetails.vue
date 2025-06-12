@@ -44,7 +44,6 @@
           >
             ➕ Dodaj do koszyka
           </button>
-
           <button
             @click="buyNow"
             class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -69,12 +68,11 @@
         >
           <p class="font-semibold text-green-700">{{ review.username }}:</p>
           <p class="text-sm text-yellow-500">
-  <span v-for="n in 5" :key="n">
-    <span v-if="n <= review.rating">★</span>
-    <span v-else class="text-gray-300">★</span>
-  </span>
-</p>
-
+            <span v-for="n in 5" :key="n">
+              <span v-if="n <= review.rating">★</span>
+              <span v-else class="text-gray-300">★</span>
+            </span>
+          </p>
           <p>{{ review.comment }}</p>
         </div>
       </div>
@@ -82,17 +80,23 @@
       <!-- Formularz dodania -->
       <div v-if="isLoggedIn && !hasReviewed" class="mt-6">
         <h3 class="font-semibold mb-2">Dodaj swoją opinię:</h3>
-        <div class="flex items-center space-x-1 mb-2">
-  <span
-    v-for="n in 5"
-    :key="n"
-    @click="newReview.rating = n"
-    class="cursor-pointer text-2xl"
-    :class="n <= newReview.rating ? 'text-yellow-500' : 'text-gray-300'"
-  >
-    ★
-  </span>
-</div>
+        <div
+          class="flex items-center space-x-1 mb-2 review-stars"
+          @mouseleave="hoveredRating = 0"
+        >
+       <span
+  v-for="n in 5"
+  :key="n"
+  @mouseenter="hoveredRating = n"
+  @mouseleave="hoveredRating = 0"
+  @click.prevent="setRating(n)"
+  :class="n <= Math.max(hoveredRating, newReview.rating) ? 'text-yellow-400' : 'text-gray-300'"
+  class="cursor-pointer text-3xl inline-block w-auto transition transform hover:scale-125 hover:-rotate-3"
+>
+  ★
+</span>
+
+        </div>
 
         <textarea
           v-model="newReview.comment"
@@ -125,6 +129,7 @@ export default {
       quantity: 1,
       reviews: [],
       newReview: { rating: 5, comment: '' },
+      hoveredRating: 0,
       hasReviewed: false
     }
   },
@@ -185,13 +190,16 @@ export default {
           this.newReview,
           { headers: { Authorization: `Bearer ${getToken()}` } }
         )
-        this.newReview = { rating: 5, comment: '' }
+        this.newReview.comment = ''
         await this.fetchReviews()
         this.hasReviewed = true
       } catch (err) {
         console.error('❌ Błąd dodawania opinii:', err)
         alert(err.response?.data?.message || 'Błąd dodawania opinii.')
       }
+    },
+    setRating(n) {
+      this.newReview.rating = n
     },
     onImageError(e) {
       e.target.src = 'https://via.placeholder.com/400x300?text=Brak+zdjęcia'
@@ -201,4 +209,16 @@ export default {
 </script>
 
 <style scoped>
+.review-stars span {
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.review-stars span:hover {
+  transform: scale(1.25) rotate(-4deg);
+  color: #facc15;
+}
+.review-stars span {
+  display: inline-block;
+}
+
+
 </style>

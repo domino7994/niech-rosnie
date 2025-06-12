@@ -15,8 +15,34 @@
       @error="onImageError"
     />
     <h3 class="product-name">{{ product.name }}</h3>
-    <p class="product-description">{{ product.description }}</p>
-    <p class="product-price">{{ product.price.toFixed(2) }} zł</p>
+<p class="product-description">{{ product.description }}</p>
+<p class="product-price">{{ product.price.toFixed(2) }} zł</p>
+
+<!-- ⭐ Gwiazdki i ocena -->
+<!-- ⭐ Ocena i liczba opinii -->
+<div v-if="product.averageRating" class="flex flex-col items-center text-sm mb-1">
+  <div class="flex space-x-0.5">
+    <span
+      v-for="n in 5"
+      :key="n"
+      :class="n <= Math.round(product.averageRating) ? 'text-yellow-400' : 'text-gray-300'"
+      class="text-lg"
+    >
+      ★
+    </span>
+  </div>
+  <div class="text-gray-700 mt-0.5">
+    {{ product.averageRating }} / 5 ({{ product.reviewCount }})
+  </div>
+</div>
+
+<!-- 🛒 Liczba sprzedanych -->
+<div v-if="product.soldCount > 0" class="text-xs text-gray-500 italic mb-2">
+  {{ product.soldCount }} sprzedane
+</div>
+
+
+
   </router-link>
 
   <!-- 🔁 Przycisk admin/użytkownik -->
@@ -97,6 +123,14 @@ export default {
 .shop {
   padding: 2rem;
 }
+.rating-stars span {
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+.rating-stars span:hover {
+  transform: scale(1.2) rotate(-3deg);
+}
+
 
 .page-title {
   font-size: 2rem;
@@ -173,4 +207,9 @@ export default {
 .btn-secondary:hover {
   background-color: #c3d7b4;
 }
+
+.text-yellow-400 {
+  color: #facc15;
+}
+
 </style>
