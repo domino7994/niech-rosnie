@@ -29,6 +29,12 @@ const routes = [
   { path: '/payment-success', component: PaymentSuccess },
   { path: '/product/:id', component: ProductDetails },
   { path: '/order/:orderId/messages', component: OrderMessages, meta: { requiresAuth: true } },
+  {
+  path: '/user/messages',
+  component: () => import('../views/UserMessages.vue'),
+  meta: { requiresAuth: true }
+},
+
 
   // 🔐 Admin
   { path: '/admin', component: Admin, meta: { requiresAuth: true } },

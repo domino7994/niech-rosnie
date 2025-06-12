@@ -6,7 +6,6 @@
         <router-link to="/" class="nav-link">🏡 Strona główna</router-link>
         <router-link to="/shop" class="nav-link">🛍️ Sklep</router-link>
         <router-link v-if="isLoggedIn && !isAdmin" to="/cart" class="nav-link">🧺 Koszyk</router-link>
-
         <router-link v-if="isLoggedIn" to="/profile" class="nav-link">👤 Profil</router-link>
       </div>
 
@@ -61,7 +60,8 @@ export default {
   data() {
     return {
       unreadCount: 0,
-      adminUnreadCount: 0
+      adminUnreadCount: 0,
+      interval: null
     };
   },
   computed: {
@@ -89,10 +89,23 @@ export default {
           console.error('❌ Błąd odświeżania powiadomień admina:', err);
         }
       }
+    },
+    async fetchUserUnread() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const res = await axios.get('http://localhost:5000/api/messages/user/unread-count', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          this.unreadCount = res.data.count;
+        } catch (e) {
+          console.error('❌ Błąd liczenia wiadomości:', e);
+        }
+      }
     }
   },
   async created() {
-    updateAuthFromToken(); // ← To powoduje, że działa admin nawet po przejściu do innych widoków
+    updateAuthFromToken();
 
     const token = localStorage.getItem('token');
     if (token) {
@@ -102,15 +115,21 @@ export default {
         if (authState.isAdmin) {
           await this.fetchAdminUnread();
         } else {
-          const res = await axios.get('http://localhost:5000/api/messages/user/unread-count', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          this.unreadCount = res.data.count;
+          await this.fetchUserUnread();
         }
+
+        // ⏱️ Automatyczne odświeżanie co 30 sekund
+        this.interval = setInterval(() => {
+          if (this.isLoggedIn && this.isAdmin) this.fetchAdminUnread();
+          if (this.isLoggedIn && !this.isAdmin) this.fetchUserUnread();
+        }, 30000);
       } catch (e) {
         console.error('❌ Błąd wiadomości:', e);
       }
     }
+  },
+  unmounted() {
+    if (this.interval) clearInterval(this.interval);
   }
 };
 </script>

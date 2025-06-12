@@ -53,6 +53,7 @@ export default {
   async mounted() {
     await this.decodeUserId()
     await this.fetchMessages()
+    await this.markAsRead()
   },
   methods: {
     async decodeUserId() {
@@ -96,12 +97,30 @@ export default {
         alert('Nie udało się wysłać wiadomości.')
       }
     },
+    async markAsRead() {
+      try {
+        const res = await axios.get('http://localhost:5000/api/users/profile', {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        })
+        const isAdmin = res.data?.isAdmin
+
+        if (isAdmin) {
+          await axios.put(`http://localhost:5000/api/messages/admin/mark-read/${this.orderId}`, {}, {
+            headers: { Authorization: `Bearer ${getToken()}` }
+          })
+        }
+        // jeśli będzie endpoint mark-read dla usera, tu można dodać analogicznie
+      } catch (err) {
+        console.error('❌ Błąd oznaczania wiadomości jako przeczytane:', err)
+      }
+    },
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleString('pl-PL')
     }
   }
 }
 </script>
+
 
 <style scoped>
 /* Opcjonalne: dopasuj wygląd */

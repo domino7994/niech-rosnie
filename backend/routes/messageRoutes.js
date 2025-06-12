@@ -1,6 +1,8 @@
 const express = require('express')
 const router = express.Router()
 const Message = require('../models/Message')
+const Order = require('../models/Order') // ← brakowało!
+
 const authMiddleware = require('../middleware/authMiddleware')
 const isAdminMiddleware = require('../middleware/isAdminMiddleware')
 
@@ -24,13 +26,19 @@ router.post('/:orderId', authMiddleware, async (req, res) => {
   res.status(400)
   throw new Error('Treść wiadomości jest wymagana')
 }
-    const message = new Message({
-      order: req.params.orderId,
-      sender: req.user.id,
-      content,
-      readByAdmin: req.user.isAdmin,
-      readByUser: req.user.isAdmin ? false : true
-    })
+    
+const order = await Order.findById(req.params.orderId); // dodane
+
+const message = new Message({
+  order: req.params.orderId,
+  sender: req.user.id,
+  user: order.user, // przypisujemy właściciela zamówienia
+  content,
+  readByAdmin: req.user.isAdmin,
+  readByUser: req.user.isAdmin ? false : true
+});
+
+
 
     const saved = await message.save()
     res.status(201).json(saved)

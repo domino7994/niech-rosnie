@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const messageSchema = new mongoose.Schema({
   order: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
   sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  user:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // ← DODANE
   content: { type: String, required: true },
   readByAdmin: { type: Boolean, default: false },
   readByUser: { type: Boolean, default: false },
