@@ -1,62 +1,6 @@
 <template>
-  <div id="app">
-    <!-- 🔝 Nawigacja -->
-    <nav class="main-nav">
-      <div class="nav-left">
-        <router-link to="/" class="nav-link">🏡 Strona główna</router-link>
-        <router-link to="/shop" class="nav-link">🛍️ Sklep</router-link>
-        <router-link v-if="isLoggedIn && !isAdmin" to="/cart" class="nav-link">🧺 Koszyk</router-link>
-        <router-link v-if="isLoggedIn" to="/profile" class="nav-link">👤 Profil</router-link>
-      </div>
-
-      <div class="nav-right">
-        <!-- ✉️ Wiadomości użytkownika -->
-        <router-link
-          v-if="isLoggedIn && !isAdmin"
-          to="/user/messages"
-          class="nav-link relative"
-        >
-          ✉️
-          <span
-            v-if="unreadCount > 0"
-            class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full px-1"
-          >
-            {{ unreadCount }}
-          </span>
-        </router-link>
-
-        <!-- ✉️ Wiadomości admina -->
-        <router-link
-          v-if="isLoggedIn && isAdmin"
-          to="/admin/messages"
-          class="nav-link relative"
-        >
-          ✉️
-          <span
-            v-if="adminUnreadCount > 0"
-            class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full px-1"
-          >
-            {{ adminUnreadCount }}
-          </span>
-        </router-link>
-
-        <!-- 📦 Zamówienia admina -->
-<router-link
-  v-if="isLoggedIn && isAdmin"
-  to="/admin/orders"
-  class="nav-link"
->
-  📦 Zamówienia
-</router-link>
-
-
-        <router-link v-if="!isLoggedIn" to="/login" class="nav-link">🔐 Logowanie</router-link>
-        <router-link v-if="!isLoggedIn" to="/register" class="nav-link">📝 Rejestracja</router-link>
-        <button v-if="isLoggedIn" @click="logout" class="logout-button">🚪 Wyloguj</button>
-      </div>
-    </nav>
-
-    <!-- 📦 Widok strony -->
+  <div id="app" v-if="authInitDone">
+    <Navbar />
     <router-view />
   </div>
 </template>
@@ -64,63 +8,74 @@
 <script>
 import { authState, logout, updateAuthFromToken } from './auth';
 import axios from 'axios';
+import Navbar from './components/Navbar.vue';
 
 export default {
   name: 'App',
+
+  components: {
+    Navbar,
+  },
+
   data() {
     return {
-      unreadCount: 0,
-      adminUnreadCount: 0,
-      interval: null
+      interval: null,
+      authInitDone: false,
     };
   },
+
   computed: {
     isLoggedIn() {
       return authState.isLoggedIn;
     },
     isAdmin() {
       return authState.isAdmin;
-    }
+    },
   },
+
   methods: {
     logout() {
       logout();
       this.$router.push('/');
     },
-    async fetchAdminUnread() {
-      const token = localStorage.getItem('token');
-      if (authState.isAdmin && token) {
-        try {
-          const res = await axios.get('http://localhost:5000/api/messages/admin/unread-count', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          this.adminUnreadCount = res.data.count;
-        } catch (err) {
-          console.error('❌ Błąd odświeżania powiadomień admina:', err);
-        }
-      }
-    },
+
     async fetchUserUnread() {
       const token = localStorage.getItem('token');
       if (token) {
         try {
           const res = await axios.get('http://localhost:5000/api/messages/user/unread-count', {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           });
-          this.unreadCount = res.data.count;
+          authState.unreadCount = res.data.count;
         } catch (e) {
-          console.error('❌ Błąd liczenia wiadomości:', e);
+          console.error('❌ Błąd wiadomości użytkownika:', e);
         }
       }
-    }
+    },
+
+    async fetchAdminUnread() {
+      const token = localStorage.getItem('token');
+      if (this.isAdmin && token) {
+        try {
+          const res = await axios.get('http://localhost:5000/api/messages/admin/unread-count', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          authState.adminUnreadCount = res.data.count;
+        } catch (err) {
+          console.error('❌ Błąd wiadomości admina:', err);
+        }
+      }
+    },
   },
+
   async created() {
-    updateAuthFromToken();
+    console.log('🔄 Inicjalizacja aplikacji...');
+    await updateAuthFromToken();
+    this.authInitDone = true;
+    console.log('✅ authInitDone:', this.authInitDone);
 
     const token = localStorage.getItem('token');
     if (token) {
-      window.addEventListener('refresh-admin-messages', this.fetchAdminUnread);
-
       try {
         if (authState.isAdmin) {
           await this.fetchAdminUnread();
@@ -128,16 +83,17 @@ export default {
           await this.fetchUserUnread();
         }
 
-        // ⏱️ Automatyczne odświeżanie co 30 sekund
         this.interval = setInterval(() => {
           if (this.isLoggedIn && this.isAdmin) this.fetchAdminUnread();
           if (this.isLoggedIn && !this.isAdmin) this.fetchUserUnread();
         }, 30000);
+
       } catch (e) {
-        console.error('❌ Błąd wiadomości:', e);
+        console.error('❌ Błąd inicjalizacji wiadomości:', e);
       }
     }
   },
+
   unmounted() {
     if (this.interval) clearInterval(this.interval);
   }
@@ -145,53 +101,67 @@ export default {
 </script>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html,
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
   background-color: #f9fdf7;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
-.main-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #e6f2e2;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid #d0e6cd;
-  flex-wrap: wrap;
+#app {
+  width: 100% !important;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  padding-top: 80px;
 }
 
-.nav-left,
-.nav-right {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
+/* 🔝 Navbar style */
+.main-navbar {
+  background-color: #111;
+  text-transform: uppercase;
+  z-index: 999;
 }
 
-.nav-link {
-  text-decoration: none;
-  color: #2f5130;
-  font-weight: 600;
-  transition: color 0.2s ease;
-  position: relative;
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.25rem;
 }
 
-.nav-link:hover {
-  color: #4f7942;
-}
-
-.logout-button {
-  background-color: #4f7942;
+.brand-white {
   color: white;
-  border: none;
-  padding: 0.4rem 1.2rem;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.2s ease;
 }
 
-.logout-button:hover {
-  background-color: #3a5f33;
+.brand-green {
+  color: #00cc66;
+}
+
+.navbar-nav .nav-link {
+  color: white !important;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  padding: 0.5rem 1rem;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #00cc66 !important;
+}
+
+.navbar-nav .nav-link.router-link-exact-active {
+  color: #00ccff !important;
+  border-bottom: 2px solid #00ccff;
+}
+
+.badge {
+  font-size: 0.7rem;
 }
 </style>

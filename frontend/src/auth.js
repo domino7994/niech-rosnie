@@ -5,6 +5,8 @@ export const authState = reactive({
   isAdmin: false,
   userId: null,
   token: null,
+  unreadCount: 0,         
+  adminUnreadCount: 0  
 });
 
 export function loadTokenFromStorage() {
@@ -17,6 +19,7 @@ export function loadTokenFromStorage() {
 export function setToken(token) {
   authState.token = token;
   localStorage.setItem('token', token);
+   console.log('✔️ Ustawiam token:', token); // 👈 dodaj to
 
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -48,4 +51,5 @@ export function logout() {
   authState.userId = null;
   authState.token = null;
   localStorage.removeItem('token');
+  
 }
