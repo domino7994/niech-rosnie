@@ -2,6 +2,7 @@
   <div id="app" v-if="authInitDone">
     <Navbar />
     <router-view />
+    <Footer />
   </div>
 </template>
 
@@ -9,12 +10,14 @@
 import { authState, logout, updateAuthFromToken } from './auth';
 import axios from 'axios';
 import Navbar from './components/Navbar.vue';
+import Footer from './components/Footer.vue'
 
 export default {
   name: 'App',
 
   components: {
     Navbar,
+    Footer,
   },
 
   data() {
@@ -67,32 +70,32 @@ export default {
       }
     },
   },
+async created() {
+  console.log('🔄 Inicjalizacja aplikacji...');
+  await updateAuthFromToken();
+  this.authInitDone = true;
+  console.log('✅ authInitDone:', this.authInitDone);
 
-  async created() {
-    console.log('🔄 Inicjalizacja aplikacji...');
-    await updateAuthFromToken();
-    this.authInitDone = true;
-    console.log('✅ authInitDone:', this.authInitDone);
-
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        if (authState.isAdmin) {
-          await this.fetchAdminUnread();
-        } else {
-          await this.fetchUserUnread();
-        }
-
-        this.interval = setInterval(() => {
-          if (this.isLoggedIn && this.isAdmin) this.fetchAdminUnread();
-          if (this.isLoggedIn && !this.isAdmin) this.fetchUserUnread();
-        }, 30000);
-
-      } catch (e) {
-        console.error('❌ Błąd inicjalizacji wiadomości:', e);
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      if (authState.isAdmin) {
+        await this.fetchAdminUnread();
+      } else {
+        await this.fetchUserUnread();
       }
+
+      this.interval = setInterval(() => {
+        if (this.isLoggedIn && this.isAdmin) this.fetchAdminUnread();
+        if (this.isLoggedIn && !this.isAdmin) this.fetchUserUnread();
+      }, 30000);
+
+    } catch (e) {
+      console.error('❌ Błąd inicjalizacji wiadomości:', e);
     }
-  },
+  }
+}
+,
 
   unmounted() {
     if (this.interval) clearInterval(this.interval);

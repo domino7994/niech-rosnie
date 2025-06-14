@@ -1,11 +1,11 @@
 <template>
-  <div class="max-w-4xl mx-auto p-6 bg-white rounded shadow">
-    <div v-if="product && product.price" class="grid md:grid-cols-2 gap-6">
+  <div class="max-w-6xl mx-auto p-6 bg-white rounded-xl shadow-md">
+    <div v-if="product && product.price" class="grid md:grid-cols-2 items-start gap-6 lg:gap-10">
       <!-- Zdjęcie -->
       <img
         :src="product.imageUrl"
         :alt="product.name"
-        class="w-full rounded shadow"
+        class="w-full rounded shadow max-h-[400px] object-cover"
         @error="onImageError"
       />
 
@@ -13,7 +13,7 @@
       <div>
         <h1 class="text-3xl font-bold text-green-800 mb-2">{{ product.name }}</h1>
         <p class="text-xl font-semibold text-green-700 mb-2">{{ product.price.toFixed(2) }} zł</p>
-        <p class="text-gray-600 mb-4">{{ product.description }}</p>
+        <p class="text-gray-600 mb-4 whitespace-pre-line">{{ product.description }}</p>
 
         <!-- Link do instrukcji -->
         <a
@@ -32,21 +32,21 @@
             type="number"
             min="1"
             v-model.number="quantity"
-            class="mt-1 w-24 px-3 py-1 border rounded"
+            class="mt-1 w-24 px-3 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
 
         <!-- Przyciski -->
-        <div class="mt-6 flex gap-4">
+        <div class="mt-6 flex gap-4 flex-wrap">
           <button
             @click="addToCart"
-            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-all hover:scale-105"
           >
             ➕ Dodaj do koszyka
           </button>
           <button
             @click="buyNow"
-            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-all hover:scale-105"
           >
             ⚡ Kup teraz
           </button>
@@ -64,10 +64,10 @@
         <div
           v-for="review in reviews"
           :key="review._id"
-          class="border-b pb-3"
+          class="border-b pb-3 text-sm text-gray-800 space-y-1"
         >
           <p class="font-semibold text-green-700">{{ review.username }}:</p>
-          <p class="text-sm text-yellow-500">
+          <p class="text-yellow-500">
             <span v-for="n in 5" :key="n">
               <span v-if="n <= review.rating">★</span>
               <span v-else class="text-gray-300">★</span>
@@ -84,18 +84,17 @@
           class="flex items-center space-x-1 mb-2 review-stars"
           @mouseleave="hoveredRating = 0"
         >
-       <span
-  v-for="n in 5"
-  :key="n"
-  @mouseenter="hoveredRating = n"
-  @mouseleave="hoveredRating = 0"
-  @click.prevent="setRating(n)"
-  :class="n <= Math.max(hoveredRating, newReview.rating) ? 'text-yellow-400' : 'text-gray-300'"
-  class="cursor-pointer text-3xl inline-block w-auto transition transform hover:scale-125 hover:-rotate-3"
->
-  ★
-</span>
-
+          <span
+            v-for="n in 5"
+            :key="n"
+            @mouseenter="hoveredRating = n"
+            @mouseleave="hoveredRating = 0"
+            @click.prevent="setRating(n)"
+            :class="n <= Math.max(hoveredRating, newReview.rating) ? 'text-yellow-400' : 'text-gray-300'"
+            class="cursor-pointer text-3xl inline-block w-auto transition transform hover:scale-125 hover:-rotate-3"
+          >
+            ★
+          </span>
         </div>
 
         <textarea
@@ -105,7 +104,7 @@
         ></textarea>
         <button
           @click="submitReview"
-          class="bg-green-700 text-white px-4 py-2 rounded"
+          class="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800 transition-all hover:scale-105"
         >
           💬 Dodaj opinię
         </button>
@@ -117,6 +116,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios'
@@ -220,5 +220,24 @@ export default {
   display: inline-block;
 }
 
+@keyframes pop-star {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.6) rotate(-15deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.review-stars span.animate-pop {
+  animation: pop-star 0.4s ease-in-out;
+}
 
 </style>
+

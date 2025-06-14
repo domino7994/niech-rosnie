@@ -4,9 +4,9 @@
     <section class="hero d-flex align-items-center justify-content-center text-center text-white">
       <div class="hero-content">
         <h1 class="title">NIECH <span class="highlight">ROŚNIE</span></h1>
-        <p class="subtitle">NATURALNY SKLEP OGRODNICZY</p>
+        <p class="subtitle">SKLEP OGRODNICZY</p>
         <p class="description">
-          Rośnij z nami – produkty najwyższej jakości, prosto do Twojego ogrodu.
+          Rośnij z nami – produkty najwyższej jakości, prosto do Twojego domu.
         </p>
         <router-link to="/shop" class="btn-hero">ZOBACZ PRODUKTY</router-link>
       </div>
@@ -21,7 +21,12 @@
       <div v-else-if="products.length === 0" class="text-center text-gray-600">Brak produktów.</div>
 
       <div class="product-grid">
-        <div v-for="product in products" :key="product._id" class="product-card">
+        <router-link
+          v-for="product in products"
+          :key="product._id"
+          :to="`/product/${product._id}`"
+          class="product-card"
+        >
           <img
             :src="product.imageUrl"
             :alt="product.name"
@@ -31,7 +36,8 @@
           <h3 class="product-name">{{ product.name }}</h3>
           <p class="product-description">{{ product.description }}</p>
           <p class="product-price">{{ product.price.toFixed(2) }} zł</p>
-        </div>
+          <span class="see-product">➤ Zobacz produkt</span>
+        </router-link>
       </div>
     </section>
 
@@ -42,7 +48,7 @@
         <div class="col-lg-6">
           <h2 class="section-title">🌿 Polecane zestawy</h2>
           <div class="product-grid">
-            <div v-for="product in products.slice(0, 3)" :key="product._id" class="product-card">
+            <div v-for="product in products.slice(0, 4)" :key="product._id" class="product-card">
               <img
                 :src="product.imageUrl"
                 :alt="product.name"
@@ -90,7 +96,7 @@ export default {
   async mounted() {
     try {
       const res = await axios.get('http://localhost:5000/api/products');
-      this.products = res.data.slice(0, 3);
+      this.products = res.data.slice(0, 5);
       const reviewRes = await axios.get('http://localhost:5000/api/reviews');
       this.reviews = reviewRes.data.slice(-2).reverse();
     } catch (err) {
@@ -113,10 +119,11 @@ export default {
   padding: 0;
 }
 
+/* 🔝 Hero */
 .hero {
   position: relative;
   height: 100vh;
-  background-image: url('/img/hero-big.jpg'); /* własne tło */
+  background-image: url('/img/hero-big.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -153,19 +160,19 @@ export default {
   color: #00cc66;
 }
 
-.subtext {
+.subtitle {
   font-size: 1.2rem;
   margin-top: 0.5rem;
   color: #e0e0e0;
 }
 
-.desc {
+.description {
   margin-top: 1rem;
   font-size: 1rem;
   color: #ccc;
 }
 
-.hero-button {
+.btn-hero {
   display: inline-block;
   margin-top: 2rem;
   padding: 0.6rem 1.8rem;
@@ -177,7 +184,7 @@ export default {
   transition: all 0.3s ease;
 }
 
-.hero-button:hover {
+.btn-hero:hover {
   background-color: #00cc66;
   border-color: #00cc66;
   color: white;
@@ -199,12 +206,18 @@ export default {
 }
 
 .product-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
   background-color: #fff;
   border-radius: 1rem;
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   transition: transform 0.3s ease;
+  text-decoration: none;
+  color: inherit;
 }
 
 .product-card:hover {
@@ -223,17 +236,30 @@ export default {
   font-weight: 600;
   color: #2f5130;
   margin-bottom: 0.5rem;
+  min-height: 2.5rem;
 }
 
 .product-description {
   font-size: 0.9rem;
   color: #666;
   margin-bottom: 0.5rem;
+  min-height: 4.5rem;
+  max-height: 4.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .product-price {
   font-weight: bold;
   color: #4f7942;
+}
+
+.see-product {
+  margin-top: auto;
+  font-size: 0.85rem;
+  color: #007b66;
+  text-decoration: underline;
+  font-weight: 500;
 }
 
 /* 💬 Opinie */
